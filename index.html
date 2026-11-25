@@ -678,6 +678,7 @@ $('#fPw').addEventListener('submit',async e=>{e.preventDefault();const a=$('#pw1
  toast(error?'Impossible : '+errMsg(error):'Mot de passe changé');if(!error)$('#fPw').reset()});
 
 /* ---------- connexion ---------- */
+let cur=null;
 const toEmail=v=>{v=v.trim().toLowerCase();return v.includes('@')?v:v+DOMAIN};
 $('#fLogin').addEventListener('submit',async e=>{e.preventDefault();const b=$('#lBtn');b.disabled=true;$('#lErr').textContent='';
  const {error}=await sb.auth.signInWithPassword({email:toEmail($('#lId').value),password:$('#lPw').value});
@@ -688,9 +689,14 @@ $('#logout').addEventListener('click',async()=>{await sb.auth.signOut()});
 
 async function enter(session){
  const u=session.user;
- const {data,error}=await sb.rpc('nawa_moi');
+ let data=null,error=null;
+ for(let i=0;i<3;i++){({data,error}=await sb.rpc('nawa_moi'));if(!error)break;await new Promise(r=>setTimeout(r,800*(i+1)))}
  const me=Array.isArray(data)?data[0]:data;
- if(error||!me){await sb.auth.signOut();$('#lErr').textContent='Ce compte n\'a pas (ou plus) accès à Nawa · Gestion.';return}
+ if(error){const m=String(error.message||'');
+  if(/JWT|token|session|auth/i.test(m)){await sb.auth.signOut();$('#lErr').textContent='Ta session a expiré, reconnecte-toi.'}
+  else{cur=null;$('#lErr').textContent='Serveur injoignable pour le moment ('+errMsg(error)+'). Réessaie dans un instant.'}
+  return}
+ if(!me){await sb.auth.signOut();$('#lErr').textContent='Ce compte n\'a pas (ou plus) accès à Nawa · Gestion.';return}
  ME={id:u.id,nom:me.nom||me.identifiant,role:me.role,identifiant:me.identifiant||String(u.email||'').split('@')[0]};
  isAdmin=ME.role==='admin';canWrite=isAdmin||ME.role==='gerant';
  document.body.classList.toggle('ro',!canWrite);
@@ -703,7 +709,6 @@ function leave(){
  ME=null;isAdmin=canWrite=false;clearS();if(channel){sb.removeChannel(channel);channel=null}
  document.body.classList.add('locked');$('#login').hidden=false;render();setTimeout(()=>$('#lId').focus(),50);
 }
-let cur=null;
 sb.auth.onAuthStateChange((ev,session)=>{
  const id=session&&session.user&&session.user.id;
  if(ev==='TOKEN_REFRESHED'||ev==='USER_UPDATED')return;
