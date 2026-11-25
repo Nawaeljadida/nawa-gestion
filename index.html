@@ -263,6 +263,25 @@ body.ro .w{display:none!important}
 
 <section id="v-salaires">
  <div class="card"><h2>Fiche <em>salaires</em></h2><div id="paie"></div></div>
+ <div class="card">
+  <h3 id="abTitle">Absence</h3>
+  <form id="fAb" class="w">
+   <div class="f2">
+    <label>Employé<select id="abE" required></select></label>
+    <label>Date<input type="date" id="abDate" required></label>
+    <label>Durée<select id="abDur"><option value="1">Journée entière</option><option value="0.5">Demi-journée</option></select></label>
+    <label>Type<select id="abPay"><option value="0">Non payée (retenue)</option><option value="1">Payée (congé, maladie justifiée…)</option></select></label>
+   </div>
+   <div class="f2">
+    <label>Motif (facultatif)<input id="abMotif" placeholder="ex. maladie, personnel…"></label>
+    <label>Retenue (DH)<input id="abRet" inputmode="decimal" placeholder="0"></label>
+   </div>
+   <p class="hint" id="abHint"></p>
+   <div class="acts" style="justify-content:flex-start"><button class="btn" id="abBtn">Enregistrer l'absence</button><button class="btn ghost" type="button" id="abCancel" hidden>Annuler</button></div>
+  </form>
+  <div class="w" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 4px"><span class="hint">Calcul d'un jour de retenue :</span><div class="seg" id="abBase"><label><input type="radio" name="abbase" value="26"><span>Salaire ÷ 26</span></label><label><input type="radio" name="abbase" value="30"><span>Salaire ÷ 30</span></label></div></div>
+  <div id="abList" style="margin-top:10px"></div>
+ </div>
  <div class="card w">
   <h3>Avance sur salaire</h3>
   <form id="fAv">
@@ -340,7 +359,7 @@ const today=()=>new Date().toLocaleDateString('sv-SE');
 const dlab=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const MODES=['Espèces','Carte','Virement','Chèque'];
-const COLS=['recettes','depenses','employes','avances','paies','reglages','fournisseurs','glovo'];
+const COLS=['recettes','depenses','employes','avances','paies','reglages','fournisseurs','glovo','absences'];
 const NAT0=['Matières premières','Boissons','Emballage','Loyer','Électricité','Eau','Gaz','Internet et téléphone','Entretien et réparations','Produits d\'hygiène','Transport','Publicité','Impôts et taxes','Autre'];
 const fkey=n=>String(n||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,80);
 const natOf=x=>String(x.nature||'').trim()||'Non classée';
@@ -394,14 +413,17 @@ function monthData(m){
  dep.forEach(d=>{byMode[d.mode||'Espèces']=(byMode[d.mode||'Espèces']||0)+num(d.montant);const f=String(d.fournisseur||'—').trim();byF[f]=(byF[f]||0)+num(d.montant);const n=natOf(d);byN[n]=(byN[n]||0)+num(d.montant)});
  const emps=Object.entries(S.employes).map(([id,e])=>({id,...e})).filter(e=>e.actif!==false).sort((a,b)=>String(a.nom).localeCompare(String(b.nom)));
  const av=Object.entries(S.avances).map(([id,a])=>({id,...a})).filter(a=>String(a.date||'').startsWith(m)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
- let masse=0,reste=0,avT=0,avCash=0,salCash=0;
- const fiche=emps.map(e=>{const s=num(e.salaire),a=av.filter(x=>x.emp===e.id).reduce((t,x)=>t+num(x.montant),0);const p=S.paies[m+'_'+e.id];masse+=s;avT+=a;
-  if(p){if((p.mode||'Espèces')==='Espèces')salCash+=num(p.montant)}else reste+=Math.max(0,s-a);return{...e,s,a,r:s-a,p}});
+ const abs=Object.entries(S.absences).map(([id,x])=>({id,...x})).filter(x=>String(x.date||'').startsWith(m)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ let masse=0,brut=0,reste=0,avT=0,avCash=0,salCash=0,retT=0;
+ const fiche=emps.map(e=>{const s=num(e.salaire),a=av.filter(x=>x.emp===e.id).reduce((t,x)=>t+num(x.montant),0);const ab=abs.filter(x=>x.emp===e.id);
+  const jNP=ab.filter(x=>!x.payee).reduce((t,x)=>t+num(x.duree||1),0),jP=ab.filter(x=>x.payee).reduce((t,x)=>t+num(x.duree||1),0),ret=ab.reduce((t,x)=>t+num(x.retenue),0);
+  const du=s-ret,p=S.paies[m+'_'+e.id];brut+=s;masse+=du;avT+=a;retT+=ret;
+  if(p){if((p.mode||'Espèces')==='Espèces')salCash+=num(p.montant)}else reste+=Math.max(0,du-a);return{...e,s,a,ret,jNP,jP,r:du-a,p}});
  av.forEach(a=>{if((a.mode||'Espèces')==='Espèces')avCash+=num(a.montant)});
  const vir=Object.entries(S.glovo).map(([id,v])=>({id,...v})).filter(v=>String(v.date||'').startsWith(m)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const GV=vir.reduce((s,v)=>s+num(v.montant),0);
  const CA=E+C+G+GV;
- return{rec,E,C,G,GV,vir,CA,dep,D,byMode,byF,byN,emps,av,fiche,masse,reste,avT,avCash,salCash,res:CA-D-masse,cash:E+G-(byMode['Espèces']||0)-avCash-salCash};
+ return{rec,E,C,G,GV,vir,CA,dep,D,byMode,byF,byN,emps,av,abs,fiche,masse,brut,retT,reste,avT,avCash,salCash,res:CA-D-masse,cash:E+G-(byMode['Espèces']||0)-avCash-salCash};
 }
 function prevM(m,k){const [y,mm]=m.split('-').map(Number);const d=new Date(y,mm-1+k,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
 
@@ -417,7 +439,7 @@ function render(){
  $('#kpis').innerHTML=[
   ['Chiffre d\'affaires',fmt(d.CA),delta===null?d.rec.length+' jour(s) saisi(s)':`<span class="${delta>=0?'up':'dn'}">${delta>=0?'+':''}${delta}%</span> vs mois précédent`],
   ['Charges',fmt(d.D),d.dep.length+' charge(s)'],
-  ['Masse salariale',fmt(d.masse),d.emps.length+' employé(s) · avances '+fmt(d.avT)],
+  ['Masse salariale',fmt(d.masse),d.emps.length+' employé(s) · avances '+fmt(d.avT)+(d.retT?' · retenues '+fmt(d.retT):'')],
   ['Reste à payer (salaires)',fmt(d.reste),'Glovo du mois : '+fmt(d.G+d.GV)+' ('+d.vir.length+' virement(s))']
  ].map(([a,b,c])=>`<div class="kpi"><p>${a}</p><div class="num">${b}</div><p>${c}</p></div>`).join('');
  const fs=Object.entries(d.byF).sort((a,b)=>b[1]-a[1]).slice(0,6),fm=fs.length?fs[0][1]:1;
@@ -435,9 +457,12 @@ function render(){
  $('#dlN').innerHTML=nats.map(n=>`<option value="${esc(n)}">`).join('');
  const q=$('#dSearch').value.trim().toLowerCase(),qn=fs2.value,dl=d.dep.filter(x=>(!q||String(x.fournisseur||'').toLowerCase().includes(q))&&(!qn||natOf(x)===qn));
  $('#depList').innerHTML=dl.length?`<table class="stack"><thead><tr><th>Date</th><th>Fournisseur</th><th>Nature</th><th>Paiement</th><th class="n">Montant</th><th></th></tr></thead><tbody>${dl.map(x=>`<tr><td>${esc(dlab(x.date))}</td><td>${esc(x.fournisseur)}${x.note?`<br><span class="hint">${esc(x.note)}</span>`:''}</td><td><span class="tag">${esc(natOf(x))}</span></td><td><span class="tag">${esc(x.mode||'Espèces')}</span></td><td class="n"><b>${fmt(num(x.montant))}</b></td><td><div class="acts w"><button class="sm" data-edit-dep="${esc(x.id)}">Modifier</button><button class="sm" data-del="depenses" data-id="${esc(x.id)}">Supprimer</button></div></td></tr>`).join('')}</tbody><tfoot><tr><td colspan="4">Total affiché</td><td class="n">${fmt(dl.reduce((s,x)=>s+num(x.montant),0))}</td><td></td></tr></tfoot></table>`:'<p class="empty">Aucune charge.</p>';
- $('#paie').innerHTML=d.fiche.length?`<table class="stack"><thead><tr><th>Employé</th><th class="n">Salaire</th><th class="n">Avances</th><th class="n">Reste à payer</th><th>Statut</th></tr></thead><tbody>${d.fiche.map(e=>`<tr><td><b>${esc(e.nom)}</b>${e.poste?`<br><span class="hint">${esc(e.poste)}</span>`:''}</td><td class="n">${fmt(e.s)}</td><td class="n">${fmt(e.a)}</td><td class="n"><b class="${e.r<0?'dn':''}">${fmt(e.r)}</b></td><td>${e.p?`<div class="acts" style="justify-content:flex-start"><span class="paid">Payé ${fmt(num(e.p.montant))} · ${esc(e.p.mode||'Espèces')} · ${esc(dlab(e.p.date))}</span><button class="sm w" data-del="paies" data-id="${esc(M+'_'+e.id)}">Annuler</button></div>`:(canWrite?`<div class="acts" style="justify-content:flex-start"><select data-pm="${esc(e.id)}" style="width:auto;min-height:38px;padding:4px 8px"><option>Espèces</option><option>Virement</option></select><button class="sm pay" data-pay="${esc(e.id)}">Payer ${fmt(Math.max(0,e.r))}</button></div>`:'<span class="hint">Non payé</span>')}</td></tr>`).join('')}</tbody><tfoot><tr><td>Total</td><td class="n">${fmt(d.masse)}</td><td class="n">${fmt(d.avT)}</td><td class="n">${fmt(d.reste)}</td><td>restant</td></tr></tfoot></table>`:'<p class="empty">Aucun employé pour l\'instant.</p>';
- const sel=$('#aE'),key=d.emps.map(e=>e.id+e.nom).join('|');
- if(sel.dataset.k!==key){const v=sel.value;sel.innerHTML=d.emps.map(e=>`<option value="${esc(e.id)}">${esc(e.nom)}</option>`).join('');sel.value=v;sel.dataset.k=key}
+ $('#paie').innerHTML=d.fiche.length?`<table class="stack"><thead><tr><th>Employé</th><th class="n">Salaire</th><th class="n">Absences</th><th class="n">Retenues</th><th class="n">Avances</th><th class="n">Reste à payer</th><th>Statut</th></tr></thead><tbody>${d.fiche.map(e=>`<tr><td><b>${esc(e.nom)}</b>${e.poste?`<br><span class="hint">${esc(e.poste)}</span>`:''}</td><td class="n">${fmt(e.s)}</td><td class="n">${e.jNP||e.jP?`${NF.format(e.jNP)} j${e.jP?`<br><span class="hint">+ ${NF.format(e.jP)} j payé(s)</span>`:''}`:'—'}</td><td class="n">${e.ret?'− '+fmt(e.ret):'—'}</td><td class="n">${fmt(e.a)}</td><td class="n"><b class="${e.r<0?'dn':''}">${fmt(e.r)}</b></td><td>${e.p?`<div class="acts" style="justify-content:flex-start"><span class="paid">Payé ${fmt(num(e.p.montant))} · ${esc(e.p.mode||'Espèces')} · ${esc(dlab(e.p.date))}</span><button class="sm w" data-del="paies" data-id="${esc(M+'_'+e.id)}">Annuler</button></div>`:(canWrite?`<div class="acts" style="justify-content:flex-start"><select data-pm="${esc(e.id)}" style="width:auto;min-height:38px;padding:4px 8px"><option>Espèces</option><option>Virement</option></select><button class="sm pay" data-pay="${esc(e.id)}">Payer ${fmt(Math.max(0,e.r))}</button></div>`:'<span class="hint">Non payé</span>')}</td></tr>`).join('')}</tbody><tfoot><tr><td>Total</td><td class="n">${fmt(d.brut)}</td><td></td><td class="n">${d.retT?'− '+fmt(d.retT):'—'}</td><td class="n">${fmt(d.avT)}</td><td class="n">${fmt(d.reste)}</td><td>restant</td></tr></tfoot></table>`:'<p class="empty">Aucun employé pour l\'instant.</p>';
+ const key=d.emps.map(e=>e.id+e.nom).join('|');
+ for(const sel of [$('#aE'),$('#abE')])if(sel.dataset.k!==key){const v=sel.value;sel.innerHTML=d.emps.map(e=>`<option value="${esc(e.id)}">${esc(e.nom)}</option>`).join('');sel.value=v||(d.emps[0]&&d.emps[0].id)||'';sel.dataset.k=key}
+ const bs=String(jBase());document.querySelectorAll('input[name=abbase]').forEach(r=>r.checked=r.value===bs);
+ if(!abManual)abAuto();
+ $('#abList').innerHTML=d.abs.length?d.abs.map(a=>`<div class="row"><span>${esc(dlab(a.date))} · <b>${esc((S.employes[a.emp]&&S.employes[a.emp].nom)||'—')}</b> <span class="tag">${num(a.duree)===0.5?'½ journée':'journée'}</span> <span class="tag">${a.payee?'payée':'non payée'}</span>${a.motif?`<br><span class="hint">${esc(a.motif)}</span>`:''}</span><span class="acts"><span class="nw">${num(a.retenue)?'− '+fmt(num(a.retenue)):'0 DH'}</span><button class="sm w" data-edit-ab="${esc(a.id)}">Modifier</button><button class="sm w" data-del="absences" data-id="${esc(a.id)}">Supprimer</button></span></div>`).join(''):'<p class="hint">Aucune absence ce mois-ci.</p>';
  const nm=id=>(S.employes[id]&&S.employes[id].nom)||'—';
  $('#avList').innerHTML=d.av.length?d.av.map(a=>`<div class="row"><span>${esc(dlab(a.date))} · <b>${esc(nm(a.emp))}</b> <span class="tag">${esc(a.mode||'Espèces')}</span></span><span class="acts"><span class="nw">${fmt(num(a.montant))}</span><button class="sm" data-del="avances" data-id="${esc(a.id)}">Supprimer</button></span></div>`).join(''):'<p class="hint">Aucune avance ce mois-ci.</p>';
  $('#empList').innerHTML=d.emps.map(e=>`<div class="row"><span><b>${esc(e.nom)}</b> ${e.poste?'· '+esc(e.poste):''}<br><span class="hint">${fmt(num(e.salaire))} / mois</span></span><span class="acts"><button class="sm" data-edit-emp="${esc(e.id)}">Modifier</button><button class="sm" data-del="employes" data-id="${esc(e.id)}">Retirer</button></span></div>`).join('');
@@ -543,6 +568,21 @@ $('#fEmp').addEventListener('submit',e=>{e.preventDefault();const old=editEmp?S.
 $('#fAv').addEventListener('submit',e=>{e.preventDefault();const m=num($('#aM').value);if(!$('#aE').value){toast('Ajoute d\'abord un employé');return}if(!m){toast('Indique un montant');return}
  put('avances',uid(),{emp:$('#aE').value,date:$('#aDate').value,montant:m,mode:$('#aMode').value});$('#aM').value='';toast('Avance enregistrée')});
 
+/* ---------- absences ---------- */
+let editAb=null,abManual=false;
+const jBase=()=>{const b=num(S.reglages.app&&S.reglages.app.joursBase);return b===30?30:26};
+function abCalc(){const e=S.employes[$('#abE').value];if(!e||$('#abPay').value==='1')return 0;return Math.round(num(e.salaire)/jBase()*num($('#abDur').value)*100)/100}
+function abAuto(){const v=abCalc();$('#abRet').value=v||'';const e=S.employes[$('#abE').value];
+ $('#abHint').textContent=$('#abPay').value==='1'?'Absence payée : pas de retenue.':e?`Calcul automatique : ${fmt(num(e.salaire))} ÷ ${jBase()} × ${$('#abDur').value==='0.5'?'½':'1'} jour = ${fmt(v)}. Tu peux modifier le montant.`:''}
+['#abE','#abDur','#abPay'].forEach(s=>$(s).addEventListener('change',()=>{abManual=false;abAuto()}));
+$('#abRet').addEventListener('input',()=>{abManual=true;$('#abHint').textContent='Montant modifié à la main. Change la durée ou le type pour revenir au calcul automatique.'});
+$('#abBase').addEventListener('change',e=>{const b=num(e.target.value);put('reglages','app',{...(S.reglages.app||{}),joursBase:b});toast('Retenue calculée sur '+b+' jours (pour les prochaines absences)')});
+const resetAb=()=>{editAb=null;abManual=false;const emp=$('#abE').value;$('#fAb').reset();$('#abE').value=emp;$('#abDate').value=today();$('#abTitle').textContent='Absence';$('#abBtn').textContent='Enregistrer l\'absence';$('#abCancel').hidden=true;abAuto()};
+$('#abCancel').onclick=resetAb;
+$('#fAb').addEventListener('submit',e=>{e.preventDefault();if(!$('#abE').value){toast('Ajoute d\'abord un employé');return}
+ put('absences',editAb||uid(),{emp:$('#abE').value,date:$('#abDate').value,duree:num($('#abDur').value),payee:$('#abPay').value==='1',motif:$('#abMotif').value.trim(),retenue:num($('#abRet').value)});
+ const dt=$('#abDate').value;if(dt.slice(0,7)!==M)M=dt.slice(0,7);toast(editAb?'Absence modifiée':'Absence enregistrée');resetAb()});
+
 /* ---------- actions sur les listes ---------- */
 const arm=b=>{if(b.dataset.armed)return true;b.dataset.armed='1';b.dataset.txt=b.textContent;b.textContent='Confirmer ?';setTimeout(()=>{if(b.isConnected&&b.dataset.armed){delete b.dataset.armed;b.textContent=b.dataset.txt}},3000);return false};
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
@@ -552,6 +592,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
  if(b.dataset.editRec){rD.value=b.dataset.editRec;fillRec();$('#fRec').scrollIntoView({behavior:'smooth'});return}
  if(b.dataset.editDep){const x=S.depenses[b.dataset.editDep];if(!x)return;editDep=b.dataset.editDep;$('#dDate').value=x.date||today();$('#dF').value=x.fournisseur||'';$('#dM').value=num(x.montant);$('#dN').value=x.note||'';
   const r=document.querySelector(`input[name=dmode][value="${MODES.includes(x.mode)?x.mode:'Espèces'}"]`);if(r)r.checked=true;$('#dNat').value=natOf(x)==='Non classée'?'':natOf(x);$('#dTitle').textContent='Modifier la charge';$('#dBtn').textContent='Mettre à jour';$('#dCancel').hidden=false;$('#fDep').scrollIntoView({behavior:'smooth'});return}
+ if(b.dataset.editAb){const x=S.absences[b.dataset.editAb];if(!x)return;editAb=b.dataset.editAb;abManual=true;$('#abE').value=x.emp;$('#abDate').value=x.date;$('#abDur').value=num(x.duree)===0.5?'0.5':'1';$('#abPay').value=x.payee?'1':'0';$('#abMotif').value=x.motif||'';$('#abRet').value=num(x.retenue)||'';
+  $('#abHint').textContent='Modification : ajuste la retenue si besoin.';$('#abTitle').textContent='Modifier l\'absence';$('#abBtn').textContent='Mettre à jour';$('#abCancel').hidden=false;$('#fAb').scrollIntoView({behavior:'smooth'});return}
  if(b.dataset.editEmp){const x=S.employes[b.dataset.editEmp];if(!x)return;editEmp=b.dataset.editEmp;$('#eN').value=x.nom||'';$('#eP').value=x.poste||'';$('#eS').value=num(x.salaire);$('#eTitle').textContent='Modifier '+(x.nom||'');$('#eBtn').textContent='Mettre à jour';$('#eCancel').hidden=false;$('#fEmp').scrollIntoView({behavior:'smooth'});return}
  if(b.dataset.pay){const f=monthData(M).fiche.find(x=>x.id===b.dataset.pay);if(!f)return;const s=document.querySelector(`select[data-pm="${CSS.escape(f.id)}"]`);
   put('paies',M+'_'+f.id,{emp:f.id,montant:Math.max(0,f.r),date:today(),mode:s?s.value:'Espèces'});toast('Salaire marqué payé');return}
@@ -560,7 +602,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
   sb.rpc('nawa_mdp_acces',{p_user:b.dataset.accPw,p_password:v}).then(({error})=>{toast(error?'Impossible : '+errMsg(error):'Mot de passe changé');if(!error&&i)i.value=''});return}
 });
 $('#copy').addEventListener('click',async()=>{const d=monthData(M);
- const txt=`Récap ${$('#mlab').textContent}\nCA : ${fmt(d.CA)} (espèces ${fmt(d.E)}, carte ${fmt(d.C)}, Glovo espèces ${fmt(d.G)}, virements Glovo ${fmt(d.GV)})\nCharges : ${fmt(d.D)}${Object.entries(d.byN).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`\n  · ${n} : ${fmt(v)}`).join('')}\nMasse salariale : ${fmt(d.masse)} (avances ${fmt(d.avT)}, reste à payer ${fmt(d.reste)})\nRésultat : ${fmt(d.res)}\nReste en espèces : ${fmt(d.cash)}`;
+ const txt=`Récap ${$('#mlab').textContent}\nCA : ${fmt(d.CA)} (espèces ${fmt(d.E)}, carte ${fmt(d.C)}, Glovo espèces ${fmt(d.G)}, virements Glovo ${fmt(d.GV)})\nCharges : ${fmt(d.D)}${Object.entries(d.byN).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`\n  · ${n} : ${fmt(v)}`).join('')}\nMasse salariale : ${fmt(d.masse)} (retenues absences ${fmt(d.retT)}, avances ${fmt(d.avT)}, reste à payer ${fmt(d.reste)})\nRésultat : ${fmt(d.res)}\nReste en espèces : ${fmt(d.cash)}`;
  try{await navigator.clipboard.writeText(txt);toast('Récapitulatif copié')}catch(err){toast('Copie refusée par le navigateur')}});
 
 /* ---------- accès (admin) ---------- */
@@ -630,7 +672,7 @@ setTheme(th||(isDark()?'dark':'light'),false);
 $('#theme').addEventListener('click',()=>setTheme(isDark()?'light':'dark',true));
 
 /* ---------- démarrage ---------- */
-rD.value=today();$('#dDate').value=today();$('#aDate').value=today();$('#vDate').value=today();
+rD.value=today();$('#dDate').value=today();$('#aDate').value=today();$('#vDate').value=today();$('#abDate').value=today();
 render();
 }
 </script>
