@@ -15,7 +15,7 @@
  --blush:#F6E7E0;--rose:#D2938E;--rose-2:#C2867C;--red:#B3322A;--coral:#DA8173;--pink:#E8A79E;--sage:#4E5C49;
  --bg:light-dark(#F6E7E0,#0E0C0C);--ink:light-dark(#3A2422,#F6E7E0);--card:light-dark(#FBF1EC,#171313);
  --line:light-dark(rgba(179,50,42,.18),rgba(246,231,224,.12));--mute:light-dark(#8A6A64,#A08C87);--acc:light-dark(#B3322A,#E8A79E);
- --s0:light-dark(#B3322A,#E8A79E);--s1:light-dark(#4E5C49,#9DB096);--s2:#DA8173;--ok:light-dark(#4E5C49,#9DB096);
+ --s0:light-dark(#B3322A,#E8A79E);--s1:light-dark(#4E5C49,#9DB096);--s2:#DA8173;--s3:light-dark(#C9A227,#E0C266);--ok:light-dark(#4E5C49,#9DB096);
  --h1:light-dark(#DDA39C,#3a1f1c);--h2:light-dark(#D2938E,#1c1414);--h3:light-dark(#C2867C,#0E0C0C);--a1:light-dark(#FBF1EC,#241a19);--a2:light-dark(#F6E7E0,#1a1414);--a3:light-dark(#F1D9D0,#141010);--at:light-dark(#3A2422,#F6E7E0);--am:light-dark(#4E5C49,#A08C87);--big:light-dark(#B3322A,#E8A79E);--glow:light-dark(rgba(255,236,226,.5),rgba(232,167,158,.18));--barbg:light-dark(#EFD6CD,#2a1f1e);
  --sans:"Jost",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
@@ -63,14 +63,14 @@ section{display:none;padding:8px 0 24px}section.on{display:block}
 .arch .lab{color:var(--am)}
 .bar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--barbg)}
 .bar i{display:block;height:100%}
-.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px;text-align:left}
+.legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px;text-align:left}
 .legend div{font-size:13px;color:var(--mute)}.legend b{display:block;font-weight:500;font-size:16px;color:var(--at);white-space:nowrap}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
-.d0{background:var(--s0)}.d1{background:var(--s1)}.d2{background:var(--s2)}
+.d0{background:var(--s0)}.d1{background:var(--s1)}.d2{background:var(--s2)}.d3{background:var(--s3)}
 .theme{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px 0 12px;border-radius:999px;border:1px solid var(--acc);background:transparent;color:var(--acc);font:400 14px var(--sans);cursor:pointer;transition:all .3s}
 .theme:hover{background:var(--red);color:var(--blush);border-color:var(--red)}.theme svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7}
 .tright{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-@media(max-width:600px){.theme span{display:none}.theme{width:44px;padding:0;justify-content:center}.tright{width:100%;justify-content:space-between}.legend div{font-size:12px}}
+@media(max-width:600px){.legend{grid-template-columns:repeat(2,minmax(0,1fr))}.theme span{display:none}.theme{width:44px;padding:0;justify-content:center}.tright{width:100%;justify-content:space-between}.legend div{font-size:12px}}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px;margin-bottom:14px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px 18px}
 .kpi p{margin:0;font-size:13px;color:var(--mute)}.kpi p:first-child{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ok);margin-bottom:4px}
@@ -78,7 +78,7 @@ section{display:none;padding:8px 0 24px}section.on{display:block}
 .up{color:var(--ok)}.dn{color:var(--acc)}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}
 .fig{position:relative;min-height:220px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
-.s0{fill:var(--s0)}.s1{fill:var(--s1)}.s2{fill:var(--s2)}.gl{stroke:var(--line)}.tk{fill:var(--mute);font-size:11px;font-family:var(--mono)}
+.s0{fill:var(--s0)}.s1{fill:var(--s1)}.s2{fill:var(--s2)}.s3{fill:var(--s3)}.gl{stroke:var(--line)}.tk{fill:var(--mute);font-size:11px;font-family:var(--mono)}
 .row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}
 .row span:last-child,.nw{white-space:nowrap;font-variant-numeric:tabular-nums}
 .hb{height:5px;border-radius:3px;background:var(--coral);margin-top:5px}
@@ -182,7 +182,7 @@ body.ro .w{display:none!important}
   <div class="arch">
    <p class="lab" style="margin:0">Résultat du mois</p>
    <div class="big" id="kRes">0 DH</div>
-   <p class="sub">Chiffre d'affaires − commission Glovo − charges − salaires</p>
+   <p class="sub">Chiffre d'affaires − charges − salaires</p>
    <div class="bar" id="split"></div>
    <div class="legend" id="leg"></div>
   </div>
@@ -205,18 +205,27 @@ body.ro .w{display:none!important}
    <div class="f2">
     <label>Espèces (DH)<input id="rE" inputmode="decimal" placeholder="0"></label>
     <label>Carte (DH)<input id="rC" inputmode="decimal" placeholder="0"></label>
-    <label>Glovo (DH)<input id="rG" inputmode="decimal" placeholder="0"></label>
+    <label>Glovo espèces (DH)<input id="rG" inputmode="decimal" placeholder="0"></label>
    </div>
    <p class="total">Total : <span id="rT" class="nw">0 DH</span></p>
    <button class="btn" id="rBtn">Enregistrer la journée</button>
-   <p class="hint">Si cette date est déjà saisie, ses montants sont remplacés.</p>
+   <p class="hint">Si cette date est déjà saisie, ses montants sont remplacés. Glovo espèces = l'argent liquide reçu pour les commandes Glovo payées à la livraison.</p>
   </form>
  </div>
- <div class="card w">
-  <label style="max-width:260px">Commission Glovo (%)<input id="gCom" inputmode="decimal" placeholder="ex. 25"></label>
-  <p class="hint" style="margin-top:6px">Sert à calculer ce que Glovo te reverse réellement.</p>
- </div>
  <div class="card"><h3>Journées du mois</h3><div class="scroll" id="recList"></div></div>
+ <div class="card w">
+  <h2>Virement <em>Glovo</em></h2>
+  <form id="fGv">
+   <div class="f2">
+    <label>Date de réception<input type="date" id="vDate" required></label>
+    <label>Montant reçu sur le compte (DH)<input id="vM" inputmode="decimal" required placeholder="0"></label>
+   </div>
+   <label>Note (facultatif)<input id="vN" placeholder="ex. semaine du 10 au 16"></label>
+   <button class="btn">Enregistrer le virement</button>
+   <p class="hint">Saisis le montant net que Glovo a envoyé sur ton compte bancaire, après toutes leurs déductions. Il compte dans le chiffre d'affaires du mois de réception, mais pas dans les espèces.</p>
+  </form>
+ </div>
+ <div class="card"><h3>Virements Glovo du mois</h3><div id="gvList"></div></div>
 </section>
 
 <section id="v-depenses">
@@ -331,7 +340,7 @@ const today=()=>new Date().toLocaleDateString('sv-SE');
 const dlab=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const MODES=['Espèces','Carte','Virement','Chèque'];
-const COLS=['recettes','depenses','employes','avances','paies','reglages','fournisseurs'];
+const COLS=['recettes','depenses','employes','avances','paies','reglages','fournisseurs','glovo'];
 const NAT0=['Matières premières','Boissons','Emballage','Loyer','Électricité','Eau','Gaz','Internet et téléphone','Entretien et réparations','Produits d\'hygiène','Transport','Publicité','Impôts et taxes','Autre'];
 const fkey=n=>String(n||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,80);
 const natOf=x=>String(x.nature||'').trim()||'Non classée';
@@ -377,7 +386,6 @@ function listen(){
 }
 
 function monthData(m){
- const gc=num(S.reglages.app&&S.reglages.app.glovoCom);
  let E=0,C=0,G=0;const rec=[];
  for(const [id,r] of Object.entries(S.recettes)){if(!id.startsWith(m))continue;const x={date:id,e:num(r.especes),c:num(r.carte),g:num(r.glovo)};rec.push(x);E+=x.e;C+=x.c;G+=x.g}
  rec.sort((a,b)=>b.date.localeCompare(a.date));
@@ -390,8 +398,10 @@ function monthData(m){
  const fiche=emps.map(e=>{const s=num(e.salaire),a=av.filter(x=>x.emp===e.id).reduce((t,x)=>t+num(x.montant),0);const p=S.paies[m+'_'+e.id];masse+=s;avT+=a;
   if(p){if((p.mode||'Espèces')==='Espèces')salCash+=num(p.montant)}else reste+=Math.max(0,s-a);return{...e,s,a,r:s-a,p}});
  av.forEach(a=>{if((a.mode||'Espèces')==='Espèces')avCash+=num(a.montant)});
- const CA=E+C+G,com=G*gc/100;
- return{rec,E,C,G,CA,com,gc,dep,D,byMode,byF,byN,emps,av,fiche,masse,reste,avT,avCash,salCash,res:CA-com-D-masse,cash:E-(byMode['Espèces']||0)-avCash-salCash};
+ const vir=Object.entries(S.glovo).map(([id,v])=>({id,...v})).filter(v=>String(v.date||'').startsWith(m)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const GV=vir.reduce((s,v)=>s+num(v.montant),0);
+ const CA=E+C+G+GV;
+ return{rec,E,C,G,GV,vir,CA,dep,D,byMode,byF,byN,emps,av,fiche,masse,reste,avT,avCash,salCash,res:CA-D-masse,cash:E+G-(byMode['Espèces']||0)-avCash-salCash};
 }
 function prevM(m,k){const [y,mm]=m.split('-').map(Number);const d=new Date(y,mm-1+k,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
 
@@ -401,23 +411,23 @@ function render(){
  const d=monthData(M),p=monthData(prevM(M,-1));
  const k=$('#kRes');k.textContent=fmt(d.res);k.classList.toggle('neg',d.res<0);
  const t=d.CA||1;
- $('#split').innerHTML=d.CA?`<i class="d0" style="width:${d.E/t*100}%"></i><i class="d1" style="width:${d.C/t*100}%"></i><i class="d2" style="width:${d.G/t*100}%"></i>`:'';
- $('#leg').innerHTML=[['Espèces',d.E,0],['Carte',d.C,1],['Glovo',d.G,2]].map(([n,v,i])=>`<div><span class="dot d${i}"></span>${n} ${d.CA?Math.round(v/t*100):0}&nbsp;%<b>${fmt(v)}</b></div>`).join('');
+ $('#split').innerHTML=d.CA?`<i class="d0" style="width:${d.E/t*100}%"></i><i class="d1" style="width:${d.C/t*100}%"></i><i class="d2" style="width:${d.G/t*100}%"></i><i class="d3" style="width:${d.GV/t*100}%"></i>`:'';
+ $('#leg').innerHTML=[['Espèces',d.E,0],['Carte',d.C,1],['Glovo espèces',d.G,2],['Glovo virement',d.GV,3]].map(([n,v,i])=>`<div><span class="dot d${i}"></span>${n} ${d.CA?Math.round(v/t*100):0}&nbsp;%<b>${fmt(v)}</b></div>`).join('');
  const delta=p.CA?Math.round((d.CA-p.CA)/p.CA*100):null;
  $('#kpis').innerHTML=[
   ['Chiffre d\'affaires',fmt(d.CA),delta===null?d.rec.length+' jour(s) saisi(s)':`<span class="${delta>=0?'up':'dn'}">${delta>=0?'+':''}${delta}%</span> vs mois précédent`],
   ['Charges',fmt(d.D),d.dep.length+' charge(s)'],
   ['Masse salariale',fmt(d.masse),d.emps.length+' employé(s) · avances '+fmt(d.avT)],
-  ['Reste à payer (salaires)',fmt(d.reste),d.gc?'Commission Glovo : '+fmt(d.com):'Commission Glovo non renseignée']
+  ['Reste à payer (salaires)',fmt(d.reste),'Glovo du mois : '+fmt(d.G+d.GV)+' ('+d.vir.length+' virement(s))']
  ].map(([a,b,c])=>`<div class="kpi"><p>${a}</p><div class="num">${b}</div><p>${c}</p></div>`).join('');
  const fs=Object.entries(d.byF).sort((a,b)=>b[1]-a[1]).slice(0,6),fm=fs.length?fs[0][1]:1;
  $('#topF').innerHTML=fs.length?fs.map(([f,v])=>`<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px"><span>${esc(f)}</span><span class="nw">${fmt(v)}</span></div><div class="hb" style="width:${v/fm*100}%"></div></div>`).join(''):'<p class="empty">Aucune charge ce mois-ci.</p>';
  const ns=Object.entries(d.byN).sort((a,b)=>b[1]-a[1]),nm0=ns.length?ns[0][1]:1;
  $('#topN').innerHTML=ns.length?ns.map(([n,v])=>`<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px"><span>${esc(n)} <span class="hint">· ${d.D?Math.round(v/d.D*100):0} %</span></span><span class="nw">${fmt(v)}</span></div><div class="hb" style="width:${v/nm0*100}%;background:var(--s0)"></div></div>`).join(''):'<p class="empty">Aucune charge ce mois-ci.</p>';
- $('#cash').innerHTML=[['Espèces encaissées',d.E],['Charges payées en espèces',-(d.byMode['Espèces']||0)],['Avances en espèces',-d.avCash],['Salaires payés en espèces',-d.salCash]].map(([a,v])=>`<div class="row"><span>${a}</span><span>${v<0?'− '+fmt(-v):fmt(v)}</span></div>`).join('')+`<div class="row"><b>Reste en espèces</b><b class="nw ${d.cash<0?'dn':''}">${fmt(d.cash)}</b></div>`;
+ $('#cash').innerHTML=[['Espèces encaissées (salle)',d.E],['Glovo encaissé en espèces',d.G],['Charges payées en espèces',-(d.byMode['Espèces']||0)],['Avances en espèces',-d.avCash],['Salaires payés en espèces',-d.salCash]].map(([a,v])=>`<div class="row"><span>${a}</span><span>${v<0?'− '+fmt(-v):fmt(v)}</span></div>`).join('')+`<div class="row"><b>Reste en espèces</b><b class="nw ${d.cash<0?'dn':''}">${fmt(d.cash)}</b></div>`;
  drawChart();renderAnalyse();
- $('#recList').innerHTML=d.rec.length?`<table class="stack"><thead><tr><th>Date</th><th class="n">Espèces</th><th class="n">Carte</th><th class="n">Glovo</th><th class="n">Total</th><th></th></tr></thead><tbody>${d.rec.map(r=>`<tr><td>${esc(dlab(r.date))}</td><td class="n">${fmt(r.e)}</td><td class="n">${fmt(r.c)}</td><td class="n">${fmt(r.g)}</td><td class="n"><b>${fmt(r.e+r.c+r.g)}</b></td><td><div class="acts w"><button class="sm" data-edit-rec="${esc(r.date)}">Modifier</button><button class="sm" data-del="recettes" data-id="${esc(r.date)}">Supprimer</button></div></td></tr>`).join('')}</tbody><tfoot><tr><td>Total</td><td class="n">${fmt(d.E)}</td><td class="n">${fmt(d.C)}</td><td class="n">${fmt(d.G)}</td><td class="n">${fmt(d.CA)}</td><td></td></tr></tfoot></table>`:'<p class="empty">Aucune journée saisie pour ce mois.</p>';
- const gi=$('#gCom');if(document.activeElement!==gi)gi.value=d.gc||'';
+ $('#recList').innerHTML=d.rec.length?`<table class="stack"><thead><tr><th>Date</th><th class="n">Espèces</th><th class="n">Carte</th><th class="n">Glovo esp.</th><th class="n">Total</th><th></th></tr></thead><tbody>${d.rec.map(r=>`<tr><td>${esc(dlab(r.date))}</td><td class="n">${fmt(r.e)}</td><td class="n">${fmt(r.c)}</td><td class="n">${fmt(r.g)}</td><td class="n"><b>${fmt(r.e+r.c+r.g)}</b></td><td><div class="acts w"><button class="sm" data-edit-rec="${esc(r.date)}">Modifier</button><button class="sm" data-del="recettes" data-id="${esc(r.date)}">Supprimer</button></div></td></tr>`).join('')}</tbody><tfoot><tr><td>Total</td><td class="n">${fmt(d.E)}</td><td class="n">${fmt(d.C)}</td><td class="n">${fmt(d.G)}</td><td class="n">${fmt(d.E+d.C+d.G)}</td><td></td></tr></tfoot></table>`:'<p class="empty">Aucune journée saisie pour ce mois.</p>';
+ $('#gvList').innerHTML=d.vir.length?d.vir.map(v=>`<div class="row"><span>${esc(dlab(v.date))}${v.note?` <span class="hint">· ${esc(v.note)}</span>`:''}</span><span class="acts"><b class="nw">${fmt(num(v.montant))}</b><button class="sm w" data-del="glovo" data-id="${esc(v.id)}">Supprimer</button></span></div>`).join('')+`<div class="row"><b>Total du mois</b><b class="nw">${fmt(d.GV)}</b></div>`:'<p class="empty">Aucun virement Glovo ce mois-ci.</p>';
  const fl=[...new Set(Object.values(S.depenses).map(x=>String(x.fournisseur||'').trim()).filter(Boolean))].sort();
  $('#dlF').innerHTML=fl.map(f=>`<option value="${esc(f)}">`).join('');
  $('#depModes').innerHTML=MODES.map(m=>`<div class="row"><span>${m}</span><span>${fmt(d.byMode[m]||0)}</span></div>`).join('')+`<div class="row"><b>Total</b><b class="nw">${fmt(d.D)}</b></div>`;
@@ -437,7 +447,7 @@ const VAR0=['Matières premières','Boissons','Emballage'];
 const WD=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
 const pct=(a,b)=>b?Math.round(a/b*100):0;
 const varSet=()=>{const v=S.reglages.app&&S.reglages.app.variables;return new Set(Array.isArray(v)?v:VAR0)};
-function costs(d){const vs=varSet();let V=d.com,Fc=0;for(const [n,v] of Object.entries(d.byN)){if(vs.has(n))V+=v;else Fc+=v}return{V,F:Fc+d.masse}}
+function costs(d){const vs=varSet();let V=0,Fc=0;for(const [n,v] of Object.entries(d.byN)){if(vs.has(n))V+=v;else Fc+=v}return{V,F:Fc+d.masse}}
 function dayAvg(){const lim=new Date();lim.setDate(lim.getDate()-90);const L=lim.toLocaleDateString('sv-SE');const sum=[0,0,0,0,0,0,0],n=[0,0,0,0,0,0,0];let all=0,na=0;
  for(const [id,r] of Object.entries(S.recettes)){if(id<L)continue;const t=num(r.especes)+num(r.carte)+num(r.glovo);const w=new Date(id+'T12:00').getDay();sum[w]+=t;n[w]++;all+=t;na++}
  return{avg:sum.map((x,i)=>n[i]?x/n[i]:null),n,all:na?all/na:0}}
@@ -448,8 +458,9 @@ function renderAnalyse(){
  const prevF=[1,2,3].map(k=>costs(monthData(prevM(M,-k))).F).filter(x=>x>0);const Fav=prevF.length?prevF.reduce((a,b)=>a+b,0)/prevF.length:0;
  if(cur&&da.all){const last=d.rec.length?d.rec[0].date:M+'-00';let add=0,left=0;
   for(let i=1;i<=nd;i++){const id=M+'-'+String(i).padStart(2,'0');if(id<=last||S.recettes[id])continue;const w=new Date(id+'T12:00').getDay();add+=da.avg[w]??da.all;left++}
-  const CAp=d.CA+add,Vp=d.CA?c.V*CAp/d.CA:0,Fp=Math.max(c.F,Fav),Rp=CAp-Vp-Fp;
-  $('#prevBox').innerHTML=`<p class="hint">Chiffre d'affaires attendu</p><div class="an-big">${fmt0(CAp)}</div><p class="hint">Déjà fait ${fmt0(d.CA)} · encore ${left} jour(s) estimé(s) d'après la moyenne de chaque jour de la semaine</p>
+  const gvp=[1,2,3].map(k=>monthData(prevM(M,-k)).GV).filter(x=>x>0),gvAv=gvp.length?gvp.reduce((a,b)=>a+b,0)/gvp.length:0,gvAdd=Math.max(0,gvAv-d.GV);
+  const CAp=d.CA+add+gvAdd,Vp=d.CA?c.V*CAp/d.CA:0,Fp=Math.max(c.F,Fav),Rp=CAp-Vp-Fp;
+  $('#prevBox').innerHTML=`<p class="hint">Chiffre d'affaires attendu</p><div class="an-big">${fmt0(CAp)}</div><p class="hint">Déjà fait ${fmt0(d.CA)} · encore ${left} jour(s) estimé(s) d'après la moyenne de chaque jour de la semaine${gvAdd?` · virements Glovo encore attendus ≈ ${fmt0(gvAdd)} (moyenne des 3 derniers mois)`:''}</p>
   <div class="row" style="margin-top:12px"><span>Résultat attendu</span><b class="nw ${Rp<0?'dn':'up'}">${fmt0(Rp)}</b></div><p class="hint">Charges variables ajustées au CA ; charges fixes = le plus haut entre ce mois-ci (${fmt0(c.F)}) et la moyenne des 3 mois précédents (${fmt0(Fav)}).</p>`}
  else $('#prevBox').innerHTML=cur?'<p class="empty">Saisis quelques journées pour obtenir une prévision.</p>':`<p class="hint">Mois terminé : résultat réel</p><div class="an-big ${d.res<0?'dn':''}">${fmt0(d.res)}</div>`;
  const tm=d.CA?(d.CA-c.V)/d.CA:0;
@@ -458,7 +469,7 @@ function renderAnalyse(){
   $('#pm').innerHTML=`<p class="hint">CA minimum pour ne pas perdre d'argent</p><div class="an-big">${fmt0(PM)}</div><p class="hint">soit ${fmt0(PMj)} par jour · marge sur charges variables ${Math.round(tm*100)} %</p><div class="prog"><i style="width:${av}%"></i></div><p>${esc(when)}</p>`}
  else $('#pm').innerHTML='<p class="empty">Il faut du CA, des charges fixes (loyer, salaires…) et des charges variables pour le calculer.</p>';
  const mat=(d.byN['Matières premières']||0)+(d.byN['Boissons']||0),loy=d.byN['Loyer']||0;
- const R=[['Coût matières (matières + boissons)',pct(mat,d.CA),[35,40],'25 à 35 %'],['Masse salariale',pct(d.masse,d.CA),[35,40],'20 à 35 %'],['Prime cost (matières + salaires)',pct(mat+d.masse,d.CA),[65,70],'moins de 65 %'],['Loyer',pct(loy,d.CA),[10,13],'moins de 10 %'],['Part Glovo dans le CA',pct(d.G,d.CA),null,'à surveiller'],['Résultat / CA (marge nette)',pct(d.res,d.CA),'inv','plus de 10 %']];
+ const R=[['Coût matières (matières + boissons)',pct(mat,d.CA),[35,40],'25 à 35 %'],['Masse salariale',pct(d.masse,d.CA),[35,40],'20 à 35 %'],['Prime cost (matières + salaires)',pct(mat+d.masse,d.CA),[65,70],'moins de 65 %'],['Loyer',pct(loy,d.CA),[10,13],'moins de 10 %'],['Part Glovo dans le CA',pct(d.G+d.GV,d.CA),null,'à surveiller'],['Résultat / CA (marge nette)',pct(d.res,d.CA),'inv','plus de 10 %']];
  $('#ratios').innerHTML=d.CA?`<table class="stack"><thead><tr><th>Indicateur</th><th class="n">Nawa</th><th>Repère</th><th>État</th></tr></thead><tbody>${R.map(([n,v,t,r])=>{let st='';if(t==='inv')st=v>=10?'<span class="st ok">Bon</span>':v>=3?'<span class="st wa">Faible</span>':'<span class="st al">Alerte</span>';else if(t)st=v<=t[0]?'<span class="st ok">Bon</span>':v<=t[1]?'<span class="st wa">Attention</span>':'<span class="st al">Trop élevé</span>';return`<tr><td>${n}</td><td class="n"><b>${v} %</b></td><td>${r}</td><td>${st}</td></tr>`}).join('')}</tbody></table>`:'<p class="empty">Pas encore de CA ce mois-ci.</p>';
  const order=[1,2,3,4,5,6,0],mx=Math.max(0,...da.avg.map(x=>x||0)),best=da.avg.indexOf(mx);
  const JN=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
@@ -470,16 +481,17 @@ function renderAnalyse(){
  if(d.cash<0)A.push(['al',`Les espèces du mois sont négatives (${fmt0(d.cash)}) : une recette ou une charge est peut-être mal saisie.`]);
  if(cur){const miss=[];for(let i=1;i<new Date().getDate();i++){const id=M+'-'+String(i).padStart(2,'0');if(!S.recettes[id])miss.push(i)}if(miss.length&&d.rec.length)A.push(['wa',`Recettes non saisies : ${miss.length} jour(s) (${miss.slice(0,8).join(', ')}${miss.length>8?'…':''}).`])}
  $('#alerts').innerHTML=A.length?A.map(([k,t])=>`<div class="alert ${k}">${t}</div>`).join(''):'<p class="empty">Rien d\'anormal ce mois-ci.</p>';
- const six=[5,4,3,2,1,0].map(k=>{const m=prevM(M,-k),x=monthData(m);return{m,CA:x.CA,co:x.com+x.D+x.masse,res:x.res,has:x.CA>0||x.D>0}}).filter(x=>x.has);const smx=Math.max(1,...six.map(x=>Math.max(x.CA,x.co)));
- $('#six').innerHTML=six.some(x=>x.CA||x.co)?`<table class="stack"><thead><tr><th>Mois</th><th>CA et coûts</th><th class="n">CA</th><th class="n">Coûts</th><th class="n">Résultat</th></tr></thead><tbody>${six.map(x=>{const [yy,m2]=x.m.split('-').map(Number);return`<tr><td style="text-transform:capitalize">${new Date(yy,m2-1,1).toLocaleDateString('fr-FR',{month:'short',year:'2-digit'})}</td><td style="min-width:120px"><div class="hb" style="width:${x.CA/smx*100}%;background:var(--s1);height:8px"></div><div class="hb" style="width:${x.co/smx*100}%;background:var(--s2);height:8px"></div></td><td class="n">${fmt0(x.CA)}</td><td class="n">${fmt0(x.co)}</td><td class="n"><b class="${x.res<0?'dn':'up'}">${fmt0(x.res)}</b></td></tr>`}).join('')}</tbody></table><p class="hint" style="margin-top:8px"><span class="dot d1"></span>CA <span class="dot d2" style="margin-left:10px"></span>coûts (charges + salaires + commission Glovo)</p>`:'<p class="empty">Les mois apparaîtront ici au fil des saisies.</p>';
+ const six=[5,4,3,2,1,0].map(k=>{const m=prevM(M,-k),x=monthData(m);return{m,CA:x.CA,co:x.D+x.masse,res:x.res,has:x.CA>0||x.D>0}}).filter(x=>x.has);const smx=Math.max(1,...six.map(x=>Math.max(x.CA,x.co)));
+ $('#six').innerHTML=six.some(x=>x.CA||x.co)?`<table class="stack"><thead><tr><th>Mois</th><th>CA et coûts</th><th class="n">CA</th><th class="n">Coûts</th><th class="n">Résultat</th></tr></thead><tbody>${six.map(x=>{const [yy,m2]=x.m.split('-').map(Number);return`<tr><td style="text-transform:capitalize">${new Date(yy,m2-1,1).toLocaleDateString('fr-FR',{month:'short',year:'2-digit'})}</td><td style="min-width:120px"><div class="hb" style="width:${x.CA/smx*100}%;background:var(--s1);height:8px"></div><div class="hb" style="width:${x.co/smx*100}%;background:var(--s2);height:8px"></div></td><td class="n">${fmt0(x.CA)}</td><td class="n">${fmt0(x.co)}</td><td class="n"><b class="${x.res<0?'dn':'up'}">${fmt0(x.res)}</b></td></tr>`}).join('')}</tbody></table><p class="hint" style="margin-top:8px"><span class="dot d1"></span>CA <span class="dot d2" style="margin-left:10px"></span>coûts (charges + salaires)</p>`:'<p class="empty">Les mois apparaîtront ici au fil des saisies.</p>';
  const vs=varSet();$('#varChips').innerHTML=allNat().map(n=>`<button type="button" class="chip ${vs.has(n)?'on':''}" data-var="${esc(n)}" aria-pressed="${vs.has(n)}">${esc(n)}</button>`).join('');
 }
 
 const fig=$('#fig'),svg=$('#chart');
 function drawChart(){const W=svg.clientWidth,H=svg.clientHeight;if(!W||!H)return;
  const [y,m]=M.split('-').map(Number),nd=new Date(y,m,0).getDate(),rows=[];
- for(let i=1;i<=nd;i++){const r=S.recettes[M+'-'+String(i).padStart(2,'0')]||{};rows.push([num(r.especes),num(r.carte),num(r.glovo)])}
- const max=Math.max(...rows.map(r=>r[0]+r[1]+r[2]));
+ const gvd={};Object.values(S.glovo).forEach(v=>{if(String(v.date||'').startsWith(M))gvd[v.date]=(gvd[v.date]||0)+num(v.montant)});
+ for(let i=1;i<=nd;i++){const id=M+'-'+String(i).padStart(2,'0'),r=S.recettes[id]||{};rows.push([num(r.especes),num(r.carte),num(r.glovo),gvd[id]||0])}
+ const max=Math.max(...rows.map(r=>r[0]+r[1]+r[2]+r[3]));
  if(!max){svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" class="tk">Saisis tes recettes pour voir le graphique</text>`;return}
  const pl=4,pr=4,pt=26,pb=22,bw=(W-pl-pr)/nd,ih=H-pt-pb;
  let h=`<line x1="${pl}" x2="${W-pr}" y1="${pt}" y2="${pt}" class="gl" stroke-dasharray="3 4"/><text x="${pl}" y="${pt-8}" class="tk">${esc(fmt(max))}</text><line x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}" class="gl"/>`;
@@ -505,7 +517,9 @@ function fillRec(){const r=S.recettes[rD.value];rE.value=r?num(r.especes)||'':''
 $('#fRec').addEventListener('submit',e=>{e.preventDefault();if(!rD.value)return;
  put('recettes',rD.value,{especes:num(rE.value),carte:num(rC.value),glovo:num(rG.value)});
  if(rD.value.slice(0,7)!==M){M=rD.value.slice(0,7)}toast('Journée enregistrée');$('#rBtn').textContent='Mettre à jour la journée'});
-$('#gCom').addEventListener('change',e=>{put('reglages','app',{...(S.reglages.app||{}),glovoCom:num(e.target.value)});toast('Commission Glovo enregistrée')});
+$('#fGv').addEventListener('submit',e=>{e.preventDefault();const m=num($('#vM').value);if(!m){toast('Indique un montant');return}
+ const dt=$('#vDate').value;put('glovo',uid(),{date:dt,montant:m,note:$('#vN').value.trim()});
+ if(dt.slice(0,7)!==M)M=dt.slice(0,7);$('#vM').value='';$('#vN').value='';toast('Virement Glovo enregistré')});
 
 /* ---------- charges ---------- */
 $('#dMode').innerHTML=MODES.map((m,i)=>`<label><input type="radio" name="dmode" value="${m}"${i?'':' checked'}><span>${m}</span></label>`).join('');
@@ -546,7 +560,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
   sb.rpc('nawa_mdp_acces',{p_user:b.dataset.accPw,p_password:v}).then(({error})=>{toast(error?'Impossible : '+errMsg(error):'Mot de passe changé');if(!error&&i)i.value=''});return}
 });
 $('#copy').addEventListener('click',async()=>{const d=monthData(M);
- const txt=`Récap ${$('#mlab').textContent}\nCA : ${fmt(d.CA)} (espèces ${fmt(d.E)}, carte ${fmt(d.C)}, Glovo ${fmt(d.G)})\nCommission Glovo : ${fmt(d.com)}\nCharges : ${fmt(d.D)}${Object.entries(d.byN).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`\n  · ${n} : ${fmt(v)}`).join('')}\nMasse salariale : ${fmt(d.masse)} (avances ${fmt(d.avT)}, reste à payer ${fmt(d.reste)})\nRésultat : ${fmt(d.res)}\nReste en espèces : ${fmt(d.cash)}`;
+ const txt=`Récap ${$('#mlab').textContent}\nCA : ${fmt(d.CA)} (espèces ${fmt(d.E)}, carte ${fmt(d.C)}, Glovo espèces ${fmt(d.G)}, virements Glovo ${fmt(d.GV)})\nCharges : ${fmt(d.D)}${Object.entries(d.byN).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`\n  · ${n} : ${fmt(v)}`).join('')}\nMasse salariale : ${fmt(d.masse)} (avances ${fmt(d.avT)}, reste à payer ${fmt(d.reste)})\nRésultat : ${fmt(d.res)}\nReste en espèces : ${fmt(d.cash)}`;
  try{await navigator.clipboard.writeText(txt);toast('Récapitulatif copié')}catch(err){toast('Copie refusée par le navigateur')}});
 
 /* ---------- accès (admin) ---------- */
@@ -616,7 +630,7 @@ setTheme(th||(isDark()?'dark':'light'),false);
 $('#theme').addEventListener('click',()=>setTheme(isDark()?'light':'dark',true));
 
 /* ---------- démarrage ---------- */
-rD.value=today();$('#dDate').value=today();$('#aDate').value=today();
+rD.value=today();$('#dDate').value=today();$('#aDate').value=today();$('#vDate').value=today();
 render();
 }
 </script>
