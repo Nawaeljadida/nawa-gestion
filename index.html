@@ -285,7 +285,6 @@ body.ro .w{display:none!important}
    <div class="f2">
     <label>Employé<select id="abE" required></select></label>
     <label>Date<input type="date" id="abDate" required></label>
-    <label>Durée<select id="abDur"><option value="1">Journée entière</option><option value="0.5">Demi-journée</option></select></label>
     <label>Type<select id="abPay"><option value="0">Non payée (retenue)</option><option value="1">Payée (congé, maladie justifiée…)</option></select></label>
    </div>
    <div class="f2">
@@ -480,7 +479,7 @@ function render(){
  renderPt();
  const bs=String(jBase());document.querySelectorAll('input[name=abbase]').forEach(r=>r.checked=r.value===bs);
  if(!abManual)abAuto();
- $('#abList').innerHTML=d.abs.length?d.abs.map(a=>`<div class="row"><span>${esc(dlab(a.date))} · <b>${esc((S.employes[a.emp]&&S.employes[a.emp].nom)||'—')}</b> <span class="tag">${num(a.duree)===0.5?'½ journée':'journée'}</span> <span class="tag">${a.payee?'payée':'non payée'}</span>${a.motif?`<br><span class="hint">${esc(a.motif)}</span>`:''}</span><span class="acts"><span class="nw">${num(a.retenue)?'− '+fmt(num(a.retenue)):'0 DH'}</span><button class="sm w" data-edit-ab="${esc(a.id)}">Modifier</button><button class="sm w" data-del="absences" data-id="${esc(a.id)}">Supprimer</button></span></div>`).join(''):'<p class="hint">Aucune absence ce mois-ci.</p>';
+ $('#abList').innerHTML=d.abs.length?d.abs.map(a=>`<div class="row"><span>${esc(dlab(a.date))} · <b>${esc((S.employes[a.emp]&&S.employes[a.emp].nom)||'—')}</b> <span class="tag">${a.payee?'payée':'non payée'}</span>${a.motif?`<br><span class="hint">${esc(a.motif)}</span>`:''}</span><span class="acts"><span class="nw">${num(a.retenue)?'− '+fmt(num(a.retenue)):'0 DH'}</span><button class="sm w" data-edit-ab="${esc(a.id)}">Modifier</button><button class="sm w" data-del="absences" data-id="${esc(a.id)}">Supprimer</button></span></div>`).join(''):'<p class="hint">Aucune absence ce mois-ci.</p>';
  const nm=id=>(S.employes[id]&&S.employes[id].nom)||'—';
  $('#avList').innerHTML=d.av.length?d.av.map(a=>`<div class="row"><span>${esc(dlab(a.date))} · <b>${esc(nm(a.emp))}</b> <span class="tag">${esc(a.mode||'Espèces')}</span></span><span class="acts"><span class="nw">${fmt(num(a.montant))}</span><button class="sm" data-del="avances" data-id="${esc(a.id)}">Supprimer</button></span></div>`).join(''):'<p class="hint">Aucune avance ce mois-ci.</p>';
  $('#empList').innerHTML=d.emps.map(e=>`<div class="row"><span><b>${esc(e.nom)}</b> ${e.poste?'· '+esc(e.poste):''}<br><span class="hint">${fmt(num(e.salaire))} / mois</span></span><span class="acts"><button class="sm" data-edit-emp="${esc(e.id)}">Modifier</button><button class="sm" data-del="employes" data-id="${esc(e.id)}">Retirer</button></span></div>`).join('');
@@ -590,23 +589,23 @@ $('#fAv').addEventListener('submit',e=>{e.preventDefault();const m=num($('#aM').
 /* ---------- absences ---------- */
 let editAb=null,abManual=false;
 const jBase=()=>{const b=num(S.reglages.app&&S.reglages.app.joursBase);return b===30?30:26};
-function abCalc(){const e=S.employes[$('#abE').value];if(!e||$('#abPay').value==='1')return 0;return Math.round(num(e.salaire)/jBase()*num($('#abDur').value)*100)/100}
+function abCalc(){const e=S.employes[$('#abE').value];if(!e||$('#abPay').value==='1')return 0;return Math.round(num(e.salaire)/jBase()*100)/100}
 function abAuto(){const v=abCalc();$('#abRet').value=v||'';const e=S.employes[$('#abE').value];
- $('#abHint').textContent=$('#abPay').value==='1'?'Absence payée : pas de retenue.':e?`Calcul automatique : ${fmt(num(e.salaire))} ÷ ${jBase()} × ${$('#abDur').value==='0.5'?'½':'1'} jour = ${fmt(v)}. Tu peux modifier le montant.`:''}
-['#abE','#abDur','#abPay'].forEach(s=>$(s).addEventListener('change',()=>{abManual=false;abAuto()}));
-$('#abRet').addEventListener('input',()=>{abManual=true;$('#abHint').textContent='Montant modifié à la main. Change la durée ou le type pour revenir au calcul automatique.'});
+ $('#abHint').textContent=$('#abPay').value==='1'?'Absence payée : pas de retenue.':e?`Calcul automatique : ${fmt(num(e.salaire))} ÷ ${jBase()} = ${fmt(v)} par jour. Tu peux modifier le montant.`:''}
+['#abE','#abPay'].forEach(s=>$(s).addEventListener('change',()=>{abManual=false;abAuto()}));
+$('#abRet').addEventListener('input',()=>{abManual=true;$('#abHint').textContent='Montant modifié à la main. Change le type ou l\'employé pour revenir au calcul automatique.'});
 $('#abBase').addEventListener('change',e=>{const b=num(e.target.value);put('reglages','app',{...(S.reglages.app||{}),joursBase:b});toast('Retenue calculée sur '+b+' jours (pour les prochaines absences)')});
 const resetAb=()=>{editAb=null;abManual=false;const emp=$('#abE').value;$('#fAb').reset();$('#abE').value=emp;$('#abDate').value=today();$('#abTitle').textContent='Absence';$('#abBtn').textContent='Enregistrer l\'absence';$('#abCancel').hidden=true;abAuto()};
 $('#abCancel').onclick=resetAb;
 $('#fAb').addEventListener('submit',e=>{e.preventDefault();if(!$('#abE').value){toast('Ajoute d\'abord un employé');return}
- const emp=$('#abE').value,dt0=$('#abDate').value,k=dt0+'_'+emp,dur=num($('#abDur').value),pay=$('#abPay').value==='1';
+ const emp=$('#abE').value,dt0=$('#abDate').value,k=dt0+'_'+emp,dur=1,pay=$('#abPay').value==='1';
  if(editAb&&editAb!=='pt_'+k){const o=S.absences[editAb];del('absences',editAb);if(o&&S.pointage[o.date+'_'+o.emp])del('pointage',o.date+'_'+o.emp)}
  put('absences','pt_'+k,{emp,date:dt0,duree:dur,payee:pay,motif:$('#abMotif').value.trim(),retenue:num($('#abRet').value)});
- put('pointage',k,{emp,date:dt0,statut:pay?'AP':dur===0.5?'D':'A'});
+ put('pointage',k,{emp,date:dt0,statut:pay?'AP':'A'});
  const dt=$('#abDate').value;if(dt.slice(0,7)!==M)M=dt.slice(0,7);toast(editAb?'Absence modifiée':'Absence enregistrée');resetAb()});
 
 /* ---------- pointage ---------- */
-const PT=[['P','Présent'],['A','Absent'],['D','½ journée'],['AP','Absence payée'],['R','Repos']];
+const PT=[['P','Présent'],['A','Absent'],['AP','Absence payée'],['R','Repos']];
 const ptD=()=>$('#ptDate').value||today();
 function setPt(emp,st){const dt=ptD(),k=dt+'_'+emp,cur=S.pointage[k];
  if(cur&&cur.statut===st){del('pointage',k);if(S.absences['pt_'+k])del('absences','pt_'+k);toast('Pointage retiré');return}
@@ -643,7 +642,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
  if(b.dataset.editRec){rD.value=b.dataset.editRec;fillRec();$('#fRec').scrollIntoView({behavior:'smooth'});return}
  if(b.dataset.editDep){const x=S.depenses[b.dataset.editDep];if(!x)return;editDep=b.dataset.editDep;$('#dDate').value=x.date||today();$('#dF').value=x.fournisseur||'';$('#dM').value=num(x.montant);$('#dN').value=x.note||'';
   const r=document.querySelector(`input[name=dmode][value="${MODES.includes(x.mode)?x.mode:'Espèces'}"]`);if(r)r.checked=true;$('#dNat').value=natOf(x)==='Non classée'?'':natOf(x);$('#dTitle').textContent='Modifier la charge';$('#dBtn').textContent='Mettre à jour';$('#dCancel').hidden=false;$('#fDep').scrollIntoView({behavior:'smooth'});return}
- if(b.dataset.editAb){const x=S.absences[b.dataset.editAb];if(!x)return;editAb=b.dataset.editAb;abManual=true;$('#abE').value=x.emp;$('#abDate').value=x.date;$('#abDur').value=num(x.duree)===0.5?'0.5':'1';$('#abPay').value=x.payee?'1':'0';$('#abMotif').value=x.motif||'';$('#abRet').value=num(x.retenue)||'';
+ if(b.dataset.editAb){const x=S.absences[b.dataset.editAb];if(!x)return;editAb=b.dataset.editAb;abManual=true;$('#abE').value=x.emp;$('#abDate').value=x.date;$('#abPay').value=x.payee?'1':'0';$('#abMotif').value=x.motif||'';$('#abRet').value=num(x.retenue)||'';
   $('#abHint').textContent='Modification : ajuste la retenue si besoin.';$('#abTitle').textContent='Modifier l\'absence';$('#abBtn').textContent='Mettre à jour';$('#abCancel').hidden=false;$('#fAb').scrollIntoView({behavior:'smooth'});return}
  if(b.dataset.editEmp){const x=S.employes[b.dataset.editEmp];if(!x)return;editEmp=b.dataset.editEmp;$('#eN').value=x.nom||'';$('#eP').value=x.poste||'';$('#eS').value=num(x.salaire);$('#eTitle').textContent='Modifier '+(x.nom||'');$('#eBtn').textContent='Mettre à jour';$('#eCancel').hidden=false;$('#fEmp').scrollIntoView({behavior:'smooth'});return}
  if(b.dataset.pay){const f=monthData(M).fiche.find(x=>x.id===b.dataset.pay);if(!f)return;const s=document.querySelector(`select[data-pm="${CSS.escape(f.id)}"]`);
